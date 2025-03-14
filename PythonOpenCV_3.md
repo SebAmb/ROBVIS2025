@@ -1,51 +1,5 @@
 # Introduction en traitement et analyse des images pour des applications de robotique - Segmentation des images
 
-## Segmentation des images par la méthodes des k-moyennes (kmeans)
-
-Kmeans est un algorithme de clustering, dont l'objectif est de partitionner n points de données en k groupes (ou clusters) de manière non supervisée i.e. sans connaissance a priori de la distribution des couleur par groupe. Chaque groupe est défini par une moyenne dans l'espace de représentation des données. La moyenne de chaque groupe s'appelle "centroïde" ou "centre". Chacun des n points de données sera donc assigné à un des k clusters avec la moyenne la plus proche. Les points de données à l'intérieur d'un cluster particulier sont considérés comme "plus similaires" les uns aux autres que les points de données appartenant à d'autres groupes. Cet algorithme peut être appliquer sur des points d’origine géométrique, colorimétriques ou provenant d'autres origines.
-
-Nous allons appliquer cette méthode afin d'assurer la segmentation couleur d'une image. Ce processus revient à trouver les couleur dominantes dans l'image. Vous pouvez réaliser cette segmentation non supervisée soit avec la bibliothèque sklearn ou opencv. Dans ce qui suit nous utiliserons opencv.
-
-```
-import matplotlib.pyplot as plt
-import cv2
-import numpy as np
-
-#Ensuite charger une image et la convertir de BGR à RGB si nécessaire et l’afficher :
-image = cv2.imread('fleur.png')
-image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-plt.figure()
-plt.axis("off")
-plt.imshow(image)
-```
-
-Afin de traiter l’image en tant que point de données avec la fonction de clustering, il faut la convertir la forme matricielle de l'image en une forme vectorielle. Cette forme est contenue dans la variable vectorized :
-
-```
-vectorized = img.reshape((-1,3))
-vectorized = np.float32(vectorized)
-vectorized.shape
-```
-L'algorithme de clustering est ensuite applique à ce vecteur avec certains paramètres : K représente le nombre de groupes à estimer, nbtimes est le nombre de fois que l'algorithme est appliqué au vecteur avec une initialisation différente et criteria représente le ou les critères que l'algorithme doit remplir pour considérer que son estimation est optimale.
-
-```
-# 4 groupes recherchées
-K = 4
-# Lancer 10 fois l'algorithme avec une initialisation différente
-nbtimes=10
-# critères d'arrêt : combinaison entre la précision = 1 et le nombre d'itération = 10
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-
-# Lancement du clustering
-# KMEANS_PP_CENTERS définit la méthode d'initialisation des groupes
-# KMEANS_RANDOM_CENTERS est une autre méthode d'initialisation
-compactness,labels,centers=cv2.kmeans(vectorized,K,None,criteria,attempts,cv2.KMEANS_PP_CENTERS)
-center = np.uint8(centers)
-res = centers[label.flatten()]
-result_image = res.reshape((img_convert.shape))
-```
-
-
 ## Utilisation des réseaux convolutifs sous opencv
 
 Cette section du TP n'est pas là pour vous introduire ces nouveau outils avancés et très récents de traitement et d'analyse des images.
@@ -222,40 +176,4 @@ while True:
     if cv2.waitKey(1) >= 0:  # Break with ESC 
         break
 ```
-
-
-## Détection d'objets par ondelettes de Haar
-
-La détection d'objets à l'aide de classificateurs en cascade basés sur la décomposition en ondelettes de Haar est une méthode efficace de détection d'objets proposée par Paul Viola et Michael Jones dans leur article, "Rapid Object Detection using a Boosted Cascade of Simple Features" en 2001. Il s'agit d'une approche basée sur l'apprentissage automatique où un la fonction en cascade est formée à partir d'un grand nombre d'images positives et négatives.
-Cette méthode a été initialement mise en au point pour détecter des visages et a été étendu à d'autres objets tels quels les voitures.
-
-En python, vous pouvez faire appel à cette méthode via ``` object_cascade=cv2.CascadeClassifier() ```. Cette classe est instanciée en lui passant un paramètre qui représente le "modèle" adapté à l'objet à détecter.
-Vous pouvez télécharger les modèles relatifs à des humains ici : https://github.com/opencv/opencv/tree/master/data/haarcascades
-Pour tester le détecteur sur des véhicules, le modèle proposé par Andrews Sobral est téléchrgeable ici : https://github.com/andrewssobral/vehicle_detection_haarcascades/blob/master/cars.xml
-
-Pour appliquer le détecteur à une image il suffit d'appeler la méthode ```object=object_cascade.detectMultiScale(gray, scaleFactor=1.10, minNeighbors=3)``` en passant en paramètre le nom de la variable image (gray) qu'il faut préalablement transformée en niveau de gris. Il fauat également renseigner le facteur d'échelle (scaleFactor) utilisé pour réduire l'image à chaque étage et le nombre de voisins (minNeighbors) que chaque objet détecté doit avoir pour le valider comme "effectivement" l'objet recherché.
-
-Cette méthode fournit une liste de boites englobantes (x, y, w et h) que vous afficherez sur chaque image couleur traitée afin de visualiser les résultats de la détection.
-
-```
-for x, y, w, h in object:
-        cv2.rectangle(frame, (x, y), (x+w, y+h), (255, 0, 0), 2)
-```
-
-Ecrire un script permettant de mettre en musique cette classe et cette méthode sur la vidéo cars.mp4 fournies.
-Vous validerez votre script en utilisant les modèles relatifs au corps humains et en utilisant le flux d'une caméra.
-
-### Model training
-
-Cette méthode pourrait être très intéressante pour détecter des objets lors du "challenge". Pour cela, je vous invite à lire et utiliser ce qui est proposé sur les 2 liens suivants. Ces liens décrivent comment il est possible d'apprendre un modèle spécifique à un objet donné.
-
-http://coding-robin.de/2013/07/22/train-your-own-opencv-haar-classifier.html
-
-https://github.com/mrnugget/opencv-haar-classifier-training
-
-### Model training for an other feature
-
-Vous trouverez dans le lien suivant, l'apprentissage d'un modèle sur la base d'un autre type de caractéreristique : les Local Binary Pattern (LBP).
-
-https://medium.com/@rithikachowta/object-detection-lbp-cascade-classifier-generation-a1d1a1c2d0b
 
